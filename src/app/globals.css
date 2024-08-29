@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --dark-o: rgba(0, 0, 0, 0.5);
+  --light: #ffffff;
+  --primary-light: #ffccff;
+  --dark-o: rgba(0, 0, 0, 0.6);
   --glass: linear-gradient(var(--dark-o), var(--dark-o));
 }
 
@@ -14,6 +16,10 @@
   scroll-behavior: smooth;
 }
 
+html {
+  --translation: 160px;
+}
+
 body {
   height: 100svh;
   display: flex;
@@ -22,7 +28,7 @@ body {
 }
 
 .custom-height {
-  height: calc(100svh - 88px);
+  height: calc(100svh - 48px);
 }
 
 .custom-width {
@@ -41,13 +47,42 @@ body {
   min-width: 0;
 }
 
+.video-height {
+  height: calc((9 / 16) * 100vw);
+}
+
+.transition-blur {
+  transition:
+    -webkit-backdrop-filter 1s linear,
+    -moz-backdrop-filter 1s linear,
+    backdrop-filter 1s linear,
+    opacity 1s linear,
+    background 1s linear;
+}
+
 @layer components {
   .my-allow-overflow {
     @apply flex-grow-0 flex-shrink-0;
   }
 
   .my-background {
-    @apply h-screen w-full bg-cover bg-fixed absolute;
+    @apply h-screen w-full bg-cover bg-center bg-fixed absolute;
+  }
+
+  .my-bordered-container {
+    @apply flex justify-center border-white border-2 rounded-2xl px-8;
+  }
+
+  .my-cover {
+    @apply mx-auto rounded-2xl my-4;
+  }
+
+  .my-embla-thumbs {
+    @apply mt-4 h-[80px];
+  }
+
+  .my-embla-images {
+    @apply mt-4 h-[300px];
   }
 
   .my-footer {
@@ -55,14 +90,84 @@ body {
   }
 
   .my-glass {
-    @apply bg-gradient-to-r from-[var(--dark-o)] to-[var(--dark-o)];
+    @apply bg-gradient-to-r from-[var(--dark-o)] to-[var(--dark-o)] transition-blur duration-1000;
   }
 
   .my-header {
     @apply absolute z-50 w-full flex items-center justify-between px-4 py-2;
   }
 
+  .my-infinite-container {
+    @apply w-full h-[1px] flex-grow overflow-scroll relative z-50 flex flex-wrap justify-center my-4 gap-6;
+  }
+
+  .my-loading-text {
+    @apply text-white font-bold text-2xl text-center w-full;
+  }
+
+  .my-main {
+    @apply backdrop-blur-0 transition-blur pt-11 custom-height relative z-10 w-full overflow-hidden flex flex-col;
+  }
+
   .my-rounded-button {
-    @apply absolute top-1/2 -translate-y-1/2;
+    @apply transition-transform duration-1000 z-10;
+  }
+
+  .my-selector-option {
+    @apply font-bold py-1;
+  }
+
+  .my-slider {
+    @apply w-full flex flex-col absolute z-50 top-full -translate-y-[var(--translation)] h-svh overflow-hidden gap-0 pt-4 transition-all duration-1000 ease-in-out;
+  }
+
+  .my-star {
+    @apply absolute bottom-2 right-2 select-none;
+  }
+
+  .my-thumb-poster {
+    @apply relative w-[150px] h-[200px] flex justify-center items-center rounded-2xl bg-center bg-cover;
+  }
+
+  .my-thumb-slide {
+    @apply embla__slide relative mr-4 flex-grow-0 flex-shrink-0 basis-[40%] h-[80px] rounded-xl border-white bg-center bg-cover;
+  }
+
+  .my-title {
+    @apply text-xl font-bold text-white text-center px-16;
+  }
+
+  .my-trailer {
+    @apply mx-auto rounded-2xl my-4 w-full video-height;
+  }
+
+  .my-video-container {
+    @apply w-full mx-auto mt-3 video-height rounded-2xl overflow-hidden bg-black;
+  }
+
+  @media only screen and (min-height: 175vw) {
+    body {
+      --translation: 300px;
+    }
+
+    .my-embla-thumbs {
+      @apply mt-4 h-[220px];
+    }
+
+    .my-slider {
+      @apply -translate-y-[var(--translation)];
+    }
+
+    .my-thumb-slide {
+      @apply h-[220px];
+    }
+
+    .my-title {
+      @apply my-4;
+    }
+
+    .my-video-container {
+      @apply w-full mx-auto mt-6 video-height rounded-2xl overflow-hidden;
+    }
   }
 }

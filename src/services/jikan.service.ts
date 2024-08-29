@@ -1,4 +1,4 @@
-import { Animes } from "@/types/anime.type";
+import { Animes } from "@/types/animes.type";
 
 type Params = {
   pageParam: number;
@@ -42,7 +42,7 @@ const selectEndpoint = (key: string, query: string) => {
   return res;
 };
 
-const jikanOpts = (queryKey: [string, string]) => {
+const animesQuery = (queryKey: [string, string]) => {
   const url = selectEndpoint(queryKey[0], queryKey[1]);
 
   return {
@@ -57,4 +57,4 @@ const jikanOpts = (queryKey: [string, string]) => {
   };
 };
 
-export { jikanOpts };
+export { animesQuery };

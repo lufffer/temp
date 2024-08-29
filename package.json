@@ -18,8 +18,13 @@
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
+    "react-fast-marquee": "^1.6.5",
     "react-intersection-observer": "^9.13.0",
     "svix": "^1.25.0",
+    "video.js": "^8.17.2",
+    "videojs-contrib-quality-levels": "^4.1.0",
+    "videojs-hls-quality-selector": "^2.0.0",
+    "videojs-http-source-selector": "^1.1.6",
     "zustand": "^4.5.4"
   },
   "devDependencies": {

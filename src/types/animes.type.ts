@@ -1,6 +1,15 @@
+export interface Pages {
+  pageParams: number[];
+  pages: Animes[];
+}
+
 export interface Animes {
   data: Anime[];
   pagination: Pagination;
+}
+
+export interface DataAnime {
+  data: Anime;
 }
 
 export interface Anime {

@@ -1,20 +1,29 @@
 import { useEffect } from "react";
-import { useAnimeStore } from "@/providers/store.provider";
 import useEmblaCarousel from "embla-carousel-react";
+import { useAnimeStore } from "@/providers/store.provider";
+import RoundedButton from "./RoundedButton";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import Marquee from "react-fast-marquee";
 
 type Props = {
   options: string[];
+  type: "button" | "link" | "marquee";
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 const size = 28;
 
-export default function Selector({ options }: Props) {
+function Selector({ options, type, onClick }: Props) {
+  const path = usePathname();
   const [emblaOptionsRef, emblaOptionsApi] = useEmblaCarousel();
   const { queryKey, changeQueryKey, query } = useAnimeStore((state) => state);
 
   useEffect(() => {
     if (queryKey[0] === "anime") {
       emblaOptionsApi?.scrollTo(options.findIndex((opt) => opt === "ANIME"));
+    } else if (path === "/episodes") {
+      emblaOptionsApi?.scrollTo(options.findIndex((opt) => opt === "Episodes"));
     }
   }, [queryKey, emblaOptionsApi]);
 
@@ -33,27 +42,92 @@ export default function Selector({ options }: Props) {
     changeQueryKey([option, option === "anime" ? query : ""]);
   };
 
+  const isCurrentQueryKey = (opt: string) => {
+    return opt?.toLowerCase() === queryKey[0];
+  };
+
+  const isCurrentPath = (opt: string) => {
+    opt = "/" + opt;
+
+    return (
+      opt?.toLowerCase() === path ||
+      ("/" === path && opt?.toLowerCase() === "/home")
+    );
+  };
+
   return (
     <div className="embla" ref={emblaOptionsRef}>
       <div className="embla__container">
-        {options.map((option, i) => (
-          <div className="embla__slide my-allow-overflow basis-full" key={i}>
-            <button onClick={handleClick} className="w-full">
-              <span
-                className={`font-bold flex items-center justify-center py-1 ${option.toLowerCase() === queryKey[0] ? "text-pink-200" : "text-white"}`}
-              >
-                {option}
-              </span>
-            </button>
-          </div>
-        ))}
+        {options.map((option, i) => {
+          const opt = option;
+
+          return (
+            <div className="embla__slide my-allow-overflow basis-full" key={i}>
+              {type === "button" ? (
+                <button
+                  onClick={onClick || handleClick}
+                  className="w-full py-1"
+                >
+                  <span
+                    className={`my-selector-option`}
+                    style={{
+                      color: isCurrentQueryKey(opt)
+                        ? "var(--primary-light)"
+                        : "var(--light)",
+                    }}
+                  >
+                    {opt}
+                  </span>
+                </button>
+              ) : type === "marquee" ? (
+                <Marquee
+                  className={`my-selector-option`}
+                  style={{
+                    color: isCurrentQueryKey(opt)
+                      ? "var(--primary-light)"
+                      : "var(--light)",
+                  }}
+                >
+                  <button
+                    onClick={onClick || handleClick}
+                    className="w-full px-16"
+                  >
+                    {opt}
+                  </button>
+                </Marquee>
+              ) : (
+                <button className="w-full py-1">
+                  <Link
+                    href={"/" + opt.toLowerCase()}
+                    className={`my-selector-option`}
+                    style={{
+                      color: isCurrentPath(opt)
+                        ? "var(--primary-light)"
+                        : "var(--light)",
+                    }}
+                  >
+                    <span className="mx-16">{opt}</span>
+                  </Link>
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <button className="my-rounded-button left-0" onClick={handleMovePrev}>
+      <RoundedButton
+        className="absolute top-1/2 -translate-y-1/2 left-0"
+        onClick={handleMovePrev}
+      >
         <img src="/circle-chevron-left.svg" width={size} height={size} />
-      </button>
-      <button className="my-rounded-button right-0" onClick={handleMoveNext}>
+      </RoundedButton>
+      <RoundedButton
+        className="absolute top-1/2 -translate-y-1/2 right-0"
+        onClick={handleMoveNext}
+      >
         <img src="/circle-chevron-right.svg" width={size} height={size} />
-      </button>
+      </RoundedButton>
     </div>
   );
 }
+
+export default Selector;

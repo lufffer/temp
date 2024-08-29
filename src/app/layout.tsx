@@ -6,9 +6,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import QueryProvider from "@/providers/query.provider";
 import { AnimeStoreProvider } from "@/providers/store.provider";
 import Background from "@/components/Background";
-import Glass from "@/components/Glass";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Main from "@/components/Main";
 
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
@@ -28,9 +28,8 @@ export default function RootLayout({
           <QueryProvider>
             <ClerkProvider>
               <Background />
-              <Glass />
               <Header />
-              {children}
+              <Main>{children}</Main>
               <Footer />
             </ClerkProvider>
           </QueryProvider>

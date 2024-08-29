@@ -1,21 +1,21 @@
 import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useInView } from "react-intersection-observer";
-import { jikanOpts } from "@/services/jikan.service";
 import { useAnimeStore } from "@/providers/store.provider";
+import { useInView } from "react-intersection-observer";
+import { animesQuery } from "@/services/jikan.service";
 
 export default function Loader() {
   const { queryKey } = useAnimeStore((state) => state);
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery(
-    jikanOpts(queryKey),
+  const { fetchNextPage, hasNextPage } = useInfiniteQuery(
+    animesQuery(queryKey),
   );
   const { ref, inView } = useInView();
 
   useEffect(() => {
-    if ((inView && hasNextPage) || isFetchingNextPage) {
+    if (inView && hasNextPage) {
       fetchNextPage();
     }
-  }, [inView]);
+  }, [inView, hasNextPage]);
 
   return (
     <div className="w-full flex flex-col items-center">

@@ -1,12 +1,13 @@
 import { get } from "@/actions/favorites";
 
-const favoritesOpts = () => {
+const favoritesQuery = () => {
   return {
     queryKey: ["favorites", ""],
     queryFn: () => get(),
     initialPageParam: 1,
     getNextPageParam: () => undefined,
+    maxPages: 1,
   };
 };
 
-export { favoritesOpts };
+export { favoritesQuery };

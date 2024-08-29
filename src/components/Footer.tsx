@@ -2,17 +2,20 @@
 
 import { useRef, useState } from "react";
 import Hamburger from "hamburger-react";
-import Selector from "./Selector";
 import { useAnimeStore } from "@/providers/store.provider";
+import Selector from "./Selector";
+import BorderedContainer from "./BorderedContainer";
 
+const options = ["Home", "Episodes", "Info", "Music", "Cast", "Gallery"];
 const size = 28;
 
 export default function Footer() {
   const inputRef = useRef<HTMLInputElement>(null);
   const footerRef = useRef<HTMLElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { changeQueryKey, changeQuery } = useAnimeStore((state) => state);
-  const options = ["Summary"];
+  const { changeQueryKey, changeQuery, changeCurrent } = useAnimeStore(
+    (state) => state,
+  );
 
   const handleToggle = (toggled: boolean) => {
     const footer = footerRef.current!;
@@ -25,6 +28,7 @@ export default function Footer() {
 
     changeQueryKey(["anime", value]);
     changeQuery(value);
+    changeCurrent({ anime: 0, page: 0 });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -58,9 +62,9 @@ export default function Footer() {
         />
       </div>
       <div className="relative flex justify-end pe-2 custom-width flex-grow-0 flex-shrink-0">
-        <div className="relative w-[86%] border-white border-2 rounded-2xl">
-          <Selector options={options} />
-        </div>
+        <BorderedContainer className="relative w-full">
+          <Selector options={options} type="link" />
+        </BorderedContainer>
       </div>
     </footer>
   );

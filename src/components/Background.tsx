@@ -1,24 +1,31 @@
 "use client";
 
-import { useAnimeStore } from "@/providers/store.provider";
-import { jikanOpts } from "@/services/jikan.service";
-import { favoritesOpts } from "@/services/favorites.service";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useAnimeStore } from "@/providers/store.provider";
+import { animesQuery } from "@/services/jikan.service";
+import { favoritesQuery } from "@/services/favorites.service";
+import { useSetPages } from "@/hooks/useSetPages";
+import { useSetAnime } from "@/hooks/useSetAnime";
 
-export default function Background() {
-  const { current, queryKey } = useAnimeStore((state) => state);
-  const { data: animes } = useInfiniteQuery(jikanOpts(queryKey));
-  const { data: favorites } = useInfiniteQuery(favoritesOpts());
-  const ptr = animes ? animes : favorites;
-  const anime = ptr?.pages[current.page].data[current.anime];
-  const image = anime?.images.webp.image_url;
+function Background() {
+  const { queryKey } = useAnimeStore((state) => state);
+
+  const animes = useInfiniteQuery(animesQuery(queryKey));
+  const favorites = useInfiniteQuery(favoritesQuery());
+
+  const pages = useSetPages(animes, favorites);
+  const anime = useSetAnime(pages);
+
+  const img = anime?.images.webp.image_url || "";
 
   return (
     <div
       className="my-background"
       style={{
-        backgroundImage: `url('${image}')`,
+        backgroundImage: `url('${img}')`,
       }}
     ></div>
   );
 }
+
+export default Background;

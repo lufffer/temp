@@ -4,9 +4,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { connectToDB } from "@/app/db";
 import { User } from "@/models/user.model";
 import { Anime } from "@/models/anime.model";
-import { type Anime as AnimeT } from "@/types/anime.type";
+import { type Anime as AnimeT } from "@/types/animes.type";
 
-export const get = async () => {
+export const get = async (): Promise<any> => {
   connectToDB();
 
   try {
@@ -22,7 +22,7 @@ export const get = async () => {
   }
 };
 
-export const add = async (anime: AnimeT) => {
+export const add = async (anime: AnimeT): Promise<any> => {
   connectToDB();
 
   try {
@@ -35,19 +35,21 @@ export const add = async (anime: AnimeT) => {
       await animeDoc.save();
     }
 
-    const favorite = userDoc.favorites.some((fav) => fav.equals(animeDoc._id));
+    const favorite = userDoc.favorites.some((fav: any) =>
+      fav.equals(animeDoc._id),
+    );
     if (!favorite) {
       userDoc.favorites.push(animeDoc._id);
       await userDoc.save();
     }
 
-    return JSON.parse(JSON.stringify(userDoc.favorites));
+    return JSON.parse(JSON.stringify(animeDoc));
   } catch (err: any) {
     throw new Error(`Failed to create anime: ${err.message}`);
   }
 };
 
-export const remove = async (anime: AnimeT) => {
+export const remove = async (anime: AnimeT): Promise<any> => {
   connectToDB();
 
   try {
@@ -67,7 +69,7 @@ export const remove = async (anime: AnimeT) => {
     userDoc.favorites.splice(favoriteIndex, 1);
     await userDoc.save();
 
-    return JSON.parse(JSON.stringify(userDoc.favorites));
+    return JSON.parse(JSON.stringify(animeDoc));
   } catch (err: any) {
     throw new Error(`Failed to delete anime: ${err.message}`);
   }
