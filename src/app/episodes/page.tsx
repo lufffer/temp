@@ -29,6 +29,7 @@ import Star from "@/app/components/Star";
 import { getQueryClient } from "@/app/get-query-client";
 import { add, remove } from "@/actions/favoriteEpisodes";
 import { Episode } from "@/types/info.type";
+import { SliderHeader } from "@/components/Slider/SliderHeader";
 
 const size = 28;
 const serversOptions = ["gogocdn", "streamsb", "vidstreaming"];
@@ -204,7 +205,7 @@ export default function Page() {
       </div>
 
       <Slider ref={SliderRef}>
-        <header className="flex justify-between px-2">
+        <SliderHeader className="flex justify-between px-2">
           <BorderedContainer className="relative w-3/4">
             {relatedOptions.length > 0 && (
               <Selector
@@ -228,7 +229,7 @@ export default function Page() {
               title="Open slider"
             />
           </RoundedButton>
-        </header>
+        </SliderHeader>
         <Thumbs options={{ dragFree: true }}>
           {info && info.data ? (
             renderThumbs("my-thumb-slide")

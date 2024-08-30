@@ -7,7 +7,7 @@ GET https://consumet-luffer-anime.vercel.app/anime/gogoanime/watch/oshi-no-ko-2n
 GET https://consumet-luffer-anime.vercel.app/anime/crunchyroll/info?id=G9VHN9PK3&mediaType=movie
 GET https://consumet-luffer-anime.vercel.app/meta/anilist/demon
 GET https://gelbooru.com/index.php?page=post&s=list&tags=all
-GET https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=oshi_no_ko
+GET https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=oshi_no_ko&pid=1
 GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%tokidoki_bosotto_roshia-go_de_dereru_tonari_no_alya-san%
 GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%tokidoki_bosotto_russia-go_de_dereru_tonari_no_alya-san%
 GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%tokidoki_bosotto%

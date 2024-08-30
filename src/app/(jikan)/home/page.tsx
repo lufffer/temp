@@ -20,6 +20,8 @@ import Thumb from "@/components/Thumbs/components/Thumb";
 import InfiniteContainer from "@/components/InfiniteContainer";
 import RoundedButton from "@/components/RoundedButton";
 import { Anime, Pages } from "@/types/animes.type";
+import { SliderHeader } from "@/components/Slider/SliderHeader";
+import Icon from "@/components/Icon";
 
 const size = 28;
 const options = ["NOW", "UPCOMING", "TOP", "TOP AIRING", "ANIME", "FAVORITES"];
@@ -84,44 +86,41 @@ export default function Page() {
         : mutationRemove.mutate(anime);
     };
 
-    return (
-      pages &&
-      pages?.pages?.map((page, i) => (
-        <React.Fragment key={i}>
-          {page?.data?.map((anime: Anime, j: number): React.ReactNode => {
-            const image = anime.images.webp.image_url;
-            const bgImg = getBgImg(i, j, image);
-            const borderWidth = getBorderWidth(i, j);
+    return pages?.pages?.map((page, i) => (
+      <React.Fragment key={i}>
+        {page?.data?.map((anime: Anime, j: number): React.ReactNode => {
+          const image = anime.images.webp.image_url;
+          const bgImg = getBgImg(i, j, image);
+          const borderWidth = getBorderWidth(i, j);
 
-            return (
-              <Thumb
-                className={className}
-                bgImg={bgImg}
-                borderWidth={borderWidth}
-                onClick={() => handleClickThumb(i, j)}
-                key={anime.mal_id}
-              >
-                <SignedIn>
-                  <Star
-                    isFavorite={favorites?.data?.pages[0]?.data?.some(
-                      (fav: Anime) => fav.mal_id === anime.mal_id,
-                    )}
-                    mutate={(action: string) => chooseAction(action, anime)}
-                  />
-                </SignedIn>
-              </Thumb>
-            );
-          })}
-        </React.Fragment>
-      ))
-    );
+          return (
+            <Thumb
+              className={className}
+              bgImg={bgImg}
+              borderWidth={borderWidth}
+              onClick={() => handleClickThumb(i, j)}
+              key={anime.mal_id}
+            >
+              <SignedIn>
+                <Star
+                  isFavorite={favorites?.data?.pages[0]?.data?.some(
+                    (fav: Anime) => fav.mal_id === anime.mal_id,
+                  )}
+                  mutate={(action: string) => chooseAction(action, anime)}
+                />
+              </SignedIn>
+            </Thumb>
+          );
+        })}
+      </React.Fragment>
+    ));
   };
 
   return (
     <>
       <QuickInfo />
       <Slider ref={listRef}>
-        <header className="flex justify-between px-2">
+        <SliderHeader className="flex justify-between px-2">
           <BorderedContainer className="relative w-3/4">
             <Selector options={options} type="button" />
           </BorderedContainer>
@@ -129,15 +128,9 @@ export default function Page() {
             className="relative"
             onClick={(e) => handleToggleSlider(e, isOpen, setIsOpen, listRef)}
           >
-            <img
-              src="/circle-chevron-up.svg"
-              height={size}
-              width={size}
-              className="cursor-pointer"
-              title="Open slider"
-            />
+            <Icon src="/circle-chevron-up.svg" title="Open slider" />
           </RoundedButton>
-        </header>
+        </SliderHeader>
         <Thumbs options={{ dragFree: true, loop: true }}>
           {pages ? (
             renderThumbs("my-thumb-slide")
@@ -147,7 +140,7 @@ export default function Page() {
         </Thumbs>
         <InfiniteContainer>
           {renderThumbs("my-thumb-poster")}
-          {hasNextPage && <Loader />}
+          {hasNextPage && <Loader requester="home" />}
         </InfiniteContainer>
       </Slider>
     </>

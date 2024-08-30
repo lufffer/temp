@@ -7,7 +7,6 @@ type Props = {
   url: string;
   alt: string;
   original: string;
-  children: ReactNode;
 };
 
 function LazyImg({ w, h, url, alt, original }: Props) {

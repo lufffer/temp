@@ -3,11 +3,18 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useAnimeStore } from "@/providers/store.provider";
 import { useInView } from "react-intersection-observer";
 import { animesQuery } from "@/services/jikan.service";
+import { gelbooruOpts } from "../gallery/services/gelbooru";
 
-export default function Loader() {
+type Props = {
+  requester: "home" | "gallery";
+  title?: string;
+};
+
+export default function Loader({ requester, title }: Props) {
+  console.log(title);
   const { queryKey } = useAnimeStore((state) => state);
   const { fetchNextPage, hasNextPage } = useInfiniteQuery(
-    animesQuery(queryKey),
+    requester === "home" ? animesQuery(queryKey) : gelbooruOpts(title!),
   );
   const { ref, inView } = useInView();
 

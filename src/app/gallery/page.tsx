@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 import {
   useInfiniteQuery,
   useMutation,
   useQueries,
   useQuery,
-  UseQueryResult,
 } from "@tanstack/react-query";
 import { useAnimeStore } from "@/providers/store.provider";
 import BorderedContainer from "@/components/BorderedContainer";
@@ -16,38 +15,35 @@ import { favoritesQuery } from "@/services/favorites.service";
 import { useSetPages } from "@/hooks/useSetPages";
 import { useSetAnime } from "@/hooks/useSetAnime";
 import { gelbooruOpts, gelbooruTagsOpts } from "./services/gelbooru";
-import { useSetRelated } from "../episodes/hooks/useSetRelated";
 import { relationOpts } from "@/services/related.service";
 import { animeOpts } from "./services/jikan";
 import { useSetPrequels } from "./hooks/useSetPrequels";
 import { useSetPrequel } from "./hooks/useSetPrequel";
-import { Anime } from "@/types/animes.type";
 import { useWatchQueries } from "./hooks/useWatchQueries";
 import { useSetTitle } from "./hooks/useSetTitle";
-import { useSetPosts } from "./hooks/useSetPosts";
 import { useSetTags } from "./hooks/useSetTags";
-import { useRouter } from "next/router";
 import { useRef, useState } from "react";
 import Slider, { handleToggleSlider } from "@/components/Slider";
 import RoundedButton from "@/components/RoundedButton";
-import Thumbs from "@/components/Thumbs/Thumbs";
 import InfiniteContainer from "@/components/InfiniteContainer";
 import { Post } from "@/types/gelbooru.type";
 import Thumb from "@/components/Thumbs/components/Thumb";
 import { SignedIn } from "@clerk/nextjs";
 import Star from "../components/Star";
 import useEmblaCarousel from "embla-carousel-react";
-import { EmblaCarouselType } from "embla-carousel";
-import { calculateAspectRatioFit, shimmer, toBase64 } from "./utils/images";
+import { calculateAspectRatioFit } from "./utils/images";
 import { LazyImg } from "./components/LazyImg";
 import { favoriteImagesQuery } from "./services/favoritesImages";
 import { getQueryClient } from "../get-query-client";
 import { add, remove } from "@/actions/favoriteImages";
-
-const size = 28;
+import { SliderHeader } from "@/components/Slider/SliderHeader";
+import { Carousel } from "@/components/Carousel";
+import Icon from "@/components/Icon";
+import Loading from "@/components/Loading";
+import Loader from "../components/Loader";
 
 function Page() {
-  const [emblaImageRef, emblaApi] = useEmblaCarousel({ loop: true });
+  const [emblaImageRef, emblaImageApi] = useEmblaCarousel({ loop: true });
   const [emblaThumbsRef, emblaApiThumbs] = useEmblaCarousel({ dragFree: true });
 
   const SliderRef = useRef<HTMLDivElement>(null);
@@ -90,7 +86,7 @@ function Page() {
   const mal_id = anime?.mal_id.toString() || "";
 
   const relations = useQuery(relationOpts(mal_id));
-  const [ids, content, setContent] = useSetPrequels(relations);
+  const [ids, content] = useSetPrequels(relations);
   const possibles = useQueries(animeOpts(ids));
   const allFinished = useWatchQueries(possibles, relations.isFetched, content);
   const prequel = useSetPrequel(allFinished, possibles);
@@ -99,9 +95,12 @@ function Page() {
   const gelbooruTagsRes = useQuery(gelbooruTagsOpts(title));
   const tags = useSetTags(gelbooruTagsRes);
 
+  const hasNextPage = gelbooru.hasNextPage;
+
+  const [isFiltering, setIsFiltering] = useState(true);
+
   useEffect(() => {
     if (gelbooru.status === "success" && gelbooruTagsRes.status === "success") {
-      console.log(anime);
       if (
         gelbooru.data.pages[0]["@attributes"].count === 0 &&
         content === "0"
@@ -131,14 +130,14 @@ function Page() {
   }, [gelbooru.status, gelbooruTagsRes.status, content]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaImageApi) return;
 
-    emblaApi.on("select", (a) => {
-      const slide = emblaApi?.selectedScrollSnap();
+    emblaImageApi.on("select", () => {
+      const slide = emblaImageApi?.selectedScrollSnap();
       setCurrent({ page: Math.floor(slide / 100), image: slide });
       emblaApiThumbs!.scrollTo(slide);
     });
-  }, [emblaApi]);
+  }, [emblaImageApi]);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const target = e.target as HTMLButtonElement;
@@ -155,68 +154,76 @@ function Page() {
     action === "add" ? mutationAdd.mutate(id) : mutationRemove.mutate(id);
   };
 
-  const renderImages = (): React.ReactNode => {
-    return (
-      gelbooru?.data?.pages?.length > 0 &&
-      gelbooru?.data?.pages.map((page, i) => (
-        <React.Fragment key={i}>
-          {page &&
-            page.post &&
-            page?.post
-              .filter((post) => {
-                if (isFavorites) {
-                  return favoriteImages?.data?.pages[0]?.data?.find(
-                    (data: { id: number }) => data.id === post.id,
-                  );
-                }
-
-                return true;
-              })
-              .map((post: Post): React.ReactNode => {
-                const original = post.file_url;
-                const image =
-                  post.sample_url || post.preview_url || post.file_url;
-
-                return (
-                  <div
-                    key={post.id}
-                    className="flex items-center justify-center min-w-0 ms-4 me-4 flex-grow-0 flex-shrink-0 basis-full relative"
-                  >
-                    <LazyImg
-                      w={
-                        calculateAspectRatioFit(
-                          post.width,
-                          post.height,
-                          window.innerWidth,
-                          window.innerHeight * 0.45,
-                        ).width
-                      }
-                      h={
-                        calculateAspectRatioFit(
-                          post.width,
-                          post.height,
-                          window.innerWidth,
-                          window.innerHeight * 0.45,
-                        ).height
-                      }
-                      alt={post.title}
-                      url={image}
-                      original={original}
-                    ></LazyImg>
-                  </div>
-                );
-              })}
-        </React.Fragment>
-      ))
-    );
-  };
-
-  const handleClickThumb = (i: number, j: number, image: string) => {
+  const handleClickThumb = (i: number, j: number) => {
     setCurrent({ page: i, image: j });
-    emblaApi?.scrollTo(i * 100 + j);
+    emblaImageApi?.scrollTo(i * 100 + j);
   };
 
-  const renderThumbs = (className: string): React.ReactNode => {
+  const handleClickFilter = () => {
+    setIsFiltering(!isFiltering);
+  };
+
+  const renderImages = (): ReactNode => {
+    return gelbooru?.data?.pages.map((page, i) => (
+      <React.Fragment key={i}>
+        {page?.post
+          ?.filter((post) => {
+            if (isFavorites) {
+              return favoriteImages?.data?.pages[0]?.data?.find(
+                (data: { id: number }) => data.id === post.id,
+              );
+            }
+
+            return true;
+          })
+          .filter((post) => {
+            if (isFiltering) {
+              return post.rating !== "explicit" &&
+                post.rating !== "questionable"
+                ? true
+                : false;
+            }
+
+            return true;
+          })
+          .map((post: Post): ReactNode => {
+            const original = post.file_url;
+            const image = post.sample_url || post.preview_url || post.file_url;
+
+            return (
+              <div
+                key={post.id}
+                className="flex items-center justify-center min-w-0 ms-4 me-4 flex-grow-0 flex-shrink-0 basis-full relative"
+              >
+                <LazyImg
+                  w={
+                    calculateAspectRatioFit(
+                      post.width,
+                      post.height,
+                      window.innerWidth,
+                      window.innerHeight * 0.45,
+                    ).width
+                  }
+                  h={
+                    calculateAspectRatioFit(
+                      post.width,
+                      post.height,
+                      window.innerWidth,
+                      window.innerHeight * 0.45,
+                    ).height
+                  }
+                  alt={post.title}
+                  url={image}
+                  original={original}
+                ></LazyImg>
+              </div>
+            );
+          })}
+      </React.Fragment>
+    ));
+  };
+
+  const renderThumbs = (className: string): ReactNode => {
     const isCurrent = (i: number, j: number): boolean => {
       return current.page === i && current.image === j;
     };
@@ -234,57 +241,76 @@ function Page() {
 
     return gelbooru?.data?.pages.map((page, i) => (
       <React.Fragment key={i}>
-        {page &&
-          page.post &&
-          page?.post
-            .filter((post) => {
-              if (isFavorites) {
-                return favoriteImages?.data?.pages[0]?.data?.find(
-                  (data: { id: number }) => data.id === post.id,
-                );
-              }
-
-              return true;
-            })
-            .map((post: Post, j: number): React.ReactNode => {
-              const image =
-                post.sample_url || post.preview_url || post.file_url;
-              const bgImg = getBgImg(i, j, image);
-              const borderWidth = getBorderWidth(i, j);
-
-              return (
-                <Thumb
-                  className={className}
-                  bgImg={bgImg}
-                  borderWidth={borderWidth}
-                  onClick={() => handleClickThumb(i, j, image)}
-                  key={post.id}
-                >
-                  <SignedIn>
-                    <Star
-                      isFavorite={favoriteImages?.data?.pages[0]?.data?.some(
-                        (data: { id: number }) => data.id === post.id,
-                      )}
-                      mutate={(action: string) => chooseAction(action, post.id)}
-                    />
-                  </SignedIn>
-                </Thumb>
+        {page?.post
+          ?.filter((post) => {
+            if (isFavorites) {
+              return favoriteImages?.data?.pages[0]?.data?.find(
+                (data: { id: number }) => data.id === post.id,
               );
-            })}
+            }
+
+            return true;
+          })
+          .filter((post) => {
+            if (isFiltering) {
+              return post.rating !== "explicit" &&
+                post.rating !== "questionable"
+                ? true
+                : false;
+            }
+
+            return true;
+          })
+          .map((post: Post, j: number): ReactNode => {
+            const image = post.sample_url || post.preview_url || post.file_url;
+            const bgImg = getBgImg(i, j, image);
+            const borderWidth = getBorderWidth(i, j);
+
+            return (
+              <Thumb
+                className={className}
+                bgImg={bgImg}
+                borderWidth={borderWidth}
+                onClick={() => handleClickThumb(i, j)}
+                key={post.id}
+              >
+                <SignedIn>
+                  <Star
+                    isFavorite={favoriteImages?.data?.pages[0]?.data?.some(
+                      (data: { id: number }) => data.id === post.id,
+                    )}
+                    mutate={(action: string) => chooseAction(action, post.id)}
+                  />
+                </SignedIn>
+              </Thumb>
+            );
+          })}
       </React.Fragment>
     ));
   };
 
   return (
     <>
-      <nav
-        className="mt-4 w-full h-[45vh] overflow-hidden cursor-grab"
-        ref={emblaImageRef}
-      >
-        <div className="embla__container">{renderImages()}</div>
-      </nav>
+      <div className="relative">
+        <Carousel
+          className="mt-4 w-full h-[45vh] overflow-hidden cursor-grab relative"
+          ref={emblaImageRef}
+        >
+          {renderImages()}
+        </Carousel>
+        <RoundedButton
+          className="absolute right-2 top-4 bg-white rounded-full text-center"
+          onClick={handleClickFilter}
+        >
+          {isFiltering ? (
+            <Icon src="/filter-active.svg" title="Filter" />
+          ) : (
+            <Icon src="/filter-inactive.svg" title="Filter" />
+          )}
+        </RoundedButton>
+      </div>
       <Slider ref={SliderRef}>
-        <header className="flex justify-between px-2">
+        <SliderHeader className="flex justify-between px-2">
           <BorderedContainer className="relative w-3/4">
             <Selector onClick={handleClick} options={tags} type="marquee" />
           </BorderedContainer>
@@ -295,26 +321,17 @@ function Page() {
               handleToggleSlider(e, isSliderOpen, setIsSliderOpen, SliderRef)
             }
           >
-            <img
-              src="/circle-chevron-up.svg"
-              height={size}
-              width={size}
-              className="cursor-pointer"
-              title="Open slider"
-            />
+            <Icon src="/circle-chevron-up.svg" title="Open slider" />
           </RoundedButton>
-        </header>
+        </SliderHeader>
 
-        <nav className="embla my-embla-thumbs" ref={emblaThumbsRef}>
-          <div className="embla__container">
-            {gelbooru.isSuccess ? (
-              renderThumbs("my-thumb-slide")
-            ) : (
-              <h2 className="my-loading-text">Loading...</h2>
-            )}
-          </div>
-        </nav>
-        <InfiniteContainer>{renderThumbs("my-thumb-poster")}</InfiniteContainer>
+        <Carousel className="my-embla-thumbs" ref={emblaThumbsRef}>
+          {gelbooru.isSuccess ? renderThumbs("my-thumb-slide") : <Loading />}
+        </Carousel>
+        <InfiniteContainer>
+          {renderThumbs("my-thumb-poster")}
+          {hasNextPage && <Loader requester="gallery" title={title} />}
+        </InfiniteContainer>
       </Slider>
     </>
   );

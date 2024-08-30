@@ -8,8 +8,8 @@ import Field from "@/components/Field";
 import Bold from "@/components/Bold";
 
 type Props = {
-  className: string;
-  extra: boolean;
+  className?: string;
+  extra?: boolean;
 };
 
 export default function QuickInfo({ className, extra = false }: Props) {

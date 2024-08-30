@@ -7,8 +7,8 @@ export const gelbooruOpts = (title: string) => {
     queryFn: async ({ pageParam }: { pageParam: number }) => {
       return getFetch(title, pageParam);
     },
-    initialPageParam: 1,
-    getNextPageParam: (data: Posts, pages: any, page: number) => {
+    initialPageParam: 0,
+    getNextPageParam: (data: Posts, _: any, page: number) => {
       const limit = data["@attributes"].limit;
       const count = data["@attributes"].count;
 
