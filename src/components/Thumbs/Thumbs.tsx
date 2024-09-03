@@ -1,4 +1,7 @@
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
+import { useAnimeStore } from "@/providers/store.provider";
 
 type Props = {
   options: EmblaOptionsType;
@@ -6,7 +9,15 @@ type Props = {
 };
 
 export default function Thumbs({ options, children }: Props): React.ReactNode {
-  const [emblaAnimeRef] = useEmblaCarousel(options);
+  const path = usePathname();
+  const { current } = useAnimeStore((state) => state);
+  const [emblaAnimeRef, emblaAnimeApi] = useEmblaCarousel(options);
+
+  useEffect(() => {
+    if (emblaAnimeApi) {
+      emblaAnimeApi.scrollTo(current.anime);
+    }
+  });
 
   return (
     <nav className="embla my-embla-thumbs" ref={emblaAnimeRef}>

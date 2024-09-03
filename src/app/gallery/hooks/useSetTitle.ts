@@ -14,11 +14,13 @@ function useSetTitle(
         let title = anime?.title || "";
         title = title?.replaceAll(" ", "_");
         title = title?.replaceAll('"', "");
+        title = title?.replaceAll("°", "");
         setTitle(() => title.toLowerCase());
       } else {
         let title = prequel?.title || "";
         title = title?.replaceAll(" ", "_");
         title = title?.replaceAll('"', "");
+        title = title?.replaceAll("°", "");
         setTitle(() => title.toLowerCase());
       }
     }

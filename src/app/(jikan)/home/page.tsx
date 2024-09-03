@@ -23,14 +23,14 @@ import { Anime, Pages } from "@/types/animes.type";
 import { SliderHeader } from "@/components/Slider/SliderHeader";
 import Icon from "@/components/Icon";
 
-const size = 28;
 const options = ["NOW", "UPCOMING", "TOP", "TOP AIRING", "ANIME", "FAVORITES"];
 
 export default function Page() {
   const listRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const { current, changeCurrent, queryKey } = useAnimeStore((state) => state);
+  const { current, changeCurrent, queryKey, changeQueryKey, query } =
+    useAnimeStore((state) => state);
 
   const animes = useInfiniteQuery(animesQuery(queryKey));
   const favorites = useInfiniteQuery(favoritesQuery());
@@ -59,6 +59,14 @@ export default function Page() {
 
   const hasNextPage = animes.hasNextPage;
   const pages = useSetPages(animes, favorites);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.target as HTMLSpanElement;
+    const option = target.textContent!.toLowerCase();
+
+    changeCurrent({ page: 0, anime: 0 });
+    changeQueryKey([option, option === "anime" ? query : ""]);
+  };
 
   const handleClickThumb = (page: number, anime: number): void => {
     changeCurrent({ anime, page });
@@ -122,7 +130,7 @@ export default function Page() {
       <Slider ref={listRef}>
         <SliderHeader className="flex justify-between px-2">
           <BorderedContainer className="relative w-3/4">
-            <Selector options={options} type="button" />
+            <Selector options={options} type="button" onClick={handleClick} />
           </BorderedContainer>
           <RoundedButton
             className="relative"

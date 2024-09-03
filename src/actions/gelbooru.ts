@@ -9,8 +9,8 @@ export const getFetch = async (title: string | null, pageParam: number) => {
 };
 
 export const get = async (title: string) => {
-  console.log(title);
-  const res = await fetch(process.env.NEXT_PUBLIC_GELBOORU_TAGS + `%${title}%`);
+  console.log(process.env.NEXT_PUBLIC_GELBOORU_TAGS + `${title}%`);
+  const res = await fetch(process.env.NEXT_PUBLIC_GELBOORU_TAGS + `${title}%`);
 
   return res.json();
 };

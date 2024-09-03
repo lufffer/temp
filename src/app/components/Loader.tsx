@@ -11,7 +11,6 @@ type Props = {
 };
 
 export default function Loader({ requester, title }: Props) {
-  console.log(title);
   const { queryKey } = useAnimeStore((state) => state);
   const { fetchNextPage, hasNextPage } = useInfiniteQuery(
     requester === "home" ? animesQuery(queryKey) : gelbooruOpts(title!),

@@ -42,6 +42,13 @@ import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 import Loader from "../components/Loader";
 
+const replaces = [
+  [" ", "_"],
+  ["'", ""],
+  ['"', ""],
+  ["°", ""],
+];
+
 function Page() {
   const [emblaImageRef, emblaImageApi] = useEmblaCarousel({ loop: true });
   const [emblaThumbsRef, emblaApiThumbs] = useEmblaCarousel({ dragFree: true });
@@ -86,48 +93,281 @@ function Page() {
   const mal_id = anime?.mal_id.toString() || "";
 
   const relations = useQuery(relationOpts(mal_id));
-  const [ids, content] = useSetPrequels(relations);
+  const [ids, content, adaptation, parentStory] = useSetPrequels(relations);
   const possibles = useQueries(animeOpts(ids));
   const allFinished = useWatchQueries(possibles, relations.isFetched, content);
   const prequel = useSetPrequel(allFinished, possibles);
-  const [title, setTitle] = useSetTitle(allFinished, prequel, anime);
+  const [title, setTitle] = useState("");
+  const [tag, setTag] = useState("");
   const gelbooru = useInfiniteQuery(gelbooruOpts(title));
-  const gelbooruTagsRes = useQuery(gelbooruTagsOpts(title));
+  const gelbooruTagsRes = useQuery(gelbooruTagsOpts(tag));
   const tags = useSetTags(gelbooruTagsRes);
 
   const hasNextPage = gelbooru.hasNextPage;
 
   const [isFiltering, setIsFiltering] = useState(true);
 
+  const [possibilities, setPossibilities] = useState<string[]>([]);
+
+  const [notFound, setNotFound] = useState(false);
+
+  // Try to make a better algorithm.
+  //
+  // IDEA
+  //
+  // Become "possibles" an array of array, every inner array will contain all the different titles in order of possibilities.
+  // Then we would need an useEffect to respond to possibilities.length because we would need to pop every inner array every time we
+  // test all the array's titles. Also the useEffect need to respond to an index for the inner array current title that will be used by
+  // a "setTag" to change the tag and try to fetch possibles tags, take in account that the useEffect needs to check every time it restart
+  // that there is not a title with just one word, the only exception is the first time. Also every time it restart we need to check if
+  // is neccessary to pop an inner array.
+  // Then we would need another useEffect to respond to "gelbooruTagsRes" and check if we have results or not. If there is result we need
+  // to filter the result by type, "type === 3" (It seems the 3 is for anime), and if after filter there are data, then sort by count,
+  // "count !== 0", if so, then "setTitle", else, we need to change index and test next title.
+
+  const isNumber = (c: string) => {
+    switch (c) {
+      case "0":
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9":
+        return true;
+    }
+
+    return false;
+  };
+
+  const processTitle = (title: string) => {
+    replaces.forEach(
+      (replace) => (title = title.replaceAll(replace[0], replace[1])),
+    );
+
+    const score = title.indexOf("-");
+    if (score && score > 0 && isNumber(title[score - 1])) {
+      title = title.slice(0, score) + "_" + title.slice(score + 1);
+    }
+
+    return title.toLowerCase();
+  };
+
+  const slicedTitle = (title: string) => {
+    const colon = title.lastIndexOf(":");
+    const question = title.lastIndexOf("?");
+    const underscore = title.lastIndexOf("_");
+    const score = title.lastIndexOf("-");
+    const number = /\d/.test(title);
+
+    if (
+      (colon === question && colon === underscore && colon === score) ||
+      (underscore && number && title.split("_").length === 2)
+    ) {
+      return title;
+    }
+
+    if (
+      (underscore > colon && underscore > question && underscore > score) ||
+      (colon === question && colon === score)
+    ) {
+      title = title.slice(0, underscore);
+    } else if (colon > question && colon > score) {
+      title = title.slice(0, colon);
+    } else if (question > colon && question > score) {
+      title = title.slice(0, question);
+    } else if (score > question && score > colon) {
+      title = title.slice(0, score);
+    }
+
+    if (title[title.length - 1] === ":" || title[title.length - 1] === "?") {
+      title = title.slice(0, -1);
+    }
+
+    return title;
+  };
+
   useEffect(() => {
-    if (gelbooru.status === "success" && gelbooruTagsRes.status === "success") {
-      if (
-        gelbooru.data.pages[0]["@attributes"].count === 0 &&
-        content === "0"
-      ) {
-        if (title.split("_").length > 1) {
-          setTitle(
-            gelbooruTagsRes.data.tag
-              ? gelbooruTagsRes.data.tag[0].name
-              : title.slice(0, title.lastIndexOf("_")),
-          );
-        } else {
-          let title = anime!.title_english;
-          title = title?.replaceAll(" ", "_");
-          title = title?.replaceAll('"', "");
-          setTitle(() => title.toLowerCase());
-        }
-      } else if (
-        gelbooru.data.pages[0]["@attributes"].count === 0 &&
-        content === "1"
-      ) {
-        let title = prequel!.title_english;
-        title = title?.replaceAll(" ", "_");
-        title = title?.replaceAll('"', "");
-        setTitle(() => title.toLowerCase());
+    let possibilities = [];
+
+    if (prequel === undefined) {
+      return;
+    } else if (prequel === null) {
+      if (anime!.title) {
+        possibilities.push(anime!.title);
+      }
+      if (anime!.title_english) {
+        possibilities.push(anime!.title_english);
+      }
+      if (anime!.title_synonyms.length > 0) {
+        possibilities.push(
+          ...anime!.title_synonyms.filter((synonym) => synonym.includes(" ")),
+        );
+      }
+    } else {
+      if (prequel.title) {
+        possibilities.push(prequel.title);
+      }
+      if (prequel.title_english) {
+        possibilities.push(prequel.title_english);
+      }
+      if (prequel.title_synonyms.length > 0) {
+        possibilities.push(
+          ...prequel.title_synonyms.filter((synonym) => synonym.includes(" ")),
+        );
       }
     }
-  }, [gelbooru.status, gelbooruTagsRes.status, content]);
+
+    if (parentStory) {
+      possibilities = [parentStory];
+    }
+
+    if (adaptation) {
+      if (!parentStory || !adaptation.includes(" "))
+        possibilities = [adaptation];
+    }
+
+    possibilities.forEach(
+      (possibility, i, arr) => (arr[i] = processTitle(possibility)),
+    );
+    setPossibilities(possibilities);
+  }, [prequel]);
+
+  const index = useRef(0);
+  const lapses = useRef(0);
+  const usingSynonyms = useRef(false);
+
+  useEffect(() => {
+    if (possibilities.length > 0 && !title) {
+      if (
+        gelbooruTagsRes.isSuccess &&
+        gelbooruTagsRes.data["@attributes"].count !== 0
+      ) {
+        const filtered = gelbooruTagsRes.data.tag.filter(
+          (tag) => tag.type === 3,
+        );
+
+        if (filtered.length === 0) {
+          if (anime!.title_synonyms.length > 0 && !usingSynonyms) {
+            usingSynonyms.current = true;
+            setPossibilities(
+              anime!.title_synonyms.map((title) => processTitle(title)),
+            );
+            setTag("");
+            gelbooruTagsRes.data["@attributes"].count = 0;
+          } else {
+            setPossibilities((old) => {
+              const sliced = possibilities.map((title) => slicedTitle(title));
+              if (old.every((title, i) => title === sliced[i])) {
+                setNotFound(true);
+              } else {
+                setTag("");
+                return sliced;
+              }
+
+              return old;
+            });
+          }
+        } else {
+          usingSynonyms.current = false;
+          filtered.sort((a, b) => b.count - a.count);
+          setTitle(filtered[0].name);
+          setNotFound(false);
+        }
+
+        index.current = 0;
+        lapses.current = 0;
+      } else if (tag === "" || !gelbooruTagsRes.isPending) {
+        let possibility: string;
+        if (lapses.current > 0) {
+          possibility = possibilities[index.current] = slicedTitle(
+            possibilities[index.current],
+          );
+        } else {
+          if (possibilities[index.current].includes("я")) {
+            possibility = "milgram";
+          } else if (possibilities[index.current] === "monster") {
+            possibility = "monster_(manga)";
+          } else {
+            possibility = possibilities[index.current];
+          }
+        }
+        let length = 0;
+        setTag((old) => {
+          if (old === possibility) {
+            if (prequel && !usingSynonyms.current) {
+              const newTitles = prequel.title_synonyms.filter((title) =>
+                title.includes(" "),
+              );
+
+              newTitles.forEach(
+                (title, i, arr) => (arr[i] = processTitle(title)),
+              );
+
+              index.current = 0;
+              lapses.current = 0;
+
+              setPossibilities(newTitles);
+
+              return newTitles[0];
+            } else if (
+              anime!.title_synonyms.length > 0 &&
+              !usingSynonyms.current
+            ) {
+              setPossibilities(
+                anime!.title_synonyms.map((title) => processTitle(title)),
+              );
+              length = anime!.title_synonyms.length;
+            } else {
+              setPossibilities((old) => {
+                const sliced = possibilities.map((title) => slicedTitle(title));
+                if (old.every((value, i) => value === sliced[i])) {
+                  setNotFound(true);
+                } else {
+                  setTag("");
+                  return sliced;
+                }
+
+                return old;
+              });
+            }
+          }
+
+          return possibility;
+        });
+
+        index.current++;
+
+        if (index.current === (length > 0 ? length : possibilities.length)) {
+          index.current = 0;
+          lapses.current++;
+          setPossibilities([...new Set(possibilities)]);
+        }
+      }
+    }
+  }, [possibilities, gelbooruTagsRes.status, tag]);
+
+  useEffect(() => {
+    if (
+      !gelbooru.isSuccess &&
+      gelbooruTagsRes.isSuccess &&
+      gelbooruTagsRes.data &&
+      gelbooruTagsRes.data.tag &&
+      (gelbooruTagsRes.data.tag[0].count === 0 ||
+        gelbooruTagsRes.data.tag[0].type !== 3) &&
+      title
+    ) {
+      setPossibilities([slicedTitle(tag)]);
+      setTag(slicedTitle(tag));
+      index.current = 0;
+      lapses.current = 0;
+      gelbooruTagsRes.data["@attributes"].count = 0;
+      setTitle("");
+    }
+  }, [title, gelbooru.status, gelbooruTagsRes.status]);
 
   useEffect(() => {
     if (!emblaImageApi) return;
@@ -326,7 +566,13 @@ function Page() {
         </SliderHeader>
 
         <Carousel className="my-embla-thumbs" ref={emblaThumbsRef}>
-          {gelbooru.isSuccess ? renderThumbs("my-thumb-slide") : <Loading />}
+          {gelbooru.isSuccess ? (
+            renderThumbs("my-thumb-slide")
+          ) : notFound ? (
+            <h2 className="my-loading-text">Not Found</h2>
+          ) : (
+            <Loading />
+          )}
         </Carousel>
         <InfiniteContainer>
           {renderThumbs("my-thumb-poster")}

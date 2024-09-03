@@ -10,4 +10,6 @@ GET https://gelbooru.com/index.php?page=post&s=list&tags=all
 GET https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=oshi_no_ko&pid=1
 GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%tokidoki_bosotto_roshia-go_de_dereru_tonari_no_alya-san%
 GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%tokidoki_bosotto_russia-go_de_dereru_tonari_no_alya-san%
-GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%tokidoki_bosotto%
+GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=fairy_tail%
+GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=%gatsu_no_lion%
+GET https://gelbooru.com/index.php?page=dapi&s=tag&q=index&json=1&name_pattern=fanren%

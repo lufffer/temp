@@ -10,7 +10,11 @@ function useSetRelated(
   useEffect(() => {
     if (relations.status === "success") {
       const related = relations.data.data.filter((data) => {
-        if (data.relation === "Prequel" || data.relation === "Sequel")
+        if (
+          data.relation === "Prequel" ||
+          data.relation === "Sequel" ||
+          data.relation === "Adaptation"
+        )
           return true;
       });
 
