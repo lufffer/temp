@@ -7,6 +7,7 @@ import Selector from "../Selector";
 
 type Props = {
   opts: string[];
+  type: "link" | "button" | "marquee";
   children: ReactNode;
 };
 
@@ -41,7 +42,7 @@ const handleToggleSlider = (
   setIsOpen(!isOpen);
 };
 
-const Slider = ({ opts, children }: Props) => {
+const Slider = ({ opts, type, children }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -51,7 +52,7 @@ const Slider = ({ opts, children }: Props) => {
         <BorderedContainer className="relative w-3/4">
           <Selector
             options={opts}
-            type="button"
+            type={type}
             onClick={(e) => handleToggleSlider(e, isOpen, setIsOpen, ref)}
           />
         </BorderedContainer>

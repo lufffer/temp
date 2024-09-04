@@ -501,22 +501,7 @@ function Page() {
           )}
         </RoundedButton>
       </div>
-      <Slider ref={SliderRef}>
-        <SliderHeader className="flex justify-between px-2">
-          <BorderedContainer className="relative w-3/4">
-            <Selector onClick={handleClick} options={tags} type="marquee" />
-          </BorderedContainer>
-
-          <RoundedButton
-            className="relative"
-            onClick={(e) =>
-              handleToggleSlider(e, isSliderOpen, setIsSliderOpen, SliderRef)
-            }
-          >
-            <Icon src="/circle-chevron-up.svg" title="Open slider" />
-          </RoundedButton>
-        </SliderHeader>
-
+      <Slider opts={tags} type="marquee">
         <Carousel className="my-embla-thumbs" ref={emblaThumbsRef}>
           {gelbooru.isSuccess ? (
             renderThumbs("my-thumb-slide")

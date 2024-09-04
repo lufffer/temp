@@ -124,7 +124,7 @@ export default function Page() {
   return (
     <>
       <QuickInfo />
-      <Slider opts={options}>
+      <Slider opts={options} type="button">
         <Thumbs options={{ dragFree: true, loop: true }}>
           {pages ? (
             renderThumbs("my-thumb-slide")
