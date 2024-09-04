@@ -17,7 +17,7 @@ function useSetPages(
     ) {
       setPages(animes.data || favorites.data);
     }
-  }, [animes]);
+  }, [animes.status, favorites.status]);
 
   return pages;
 }

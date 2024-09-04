@@ -33,7 +33,9 @@ const selectEndpoint = (key: string, query: string) => {
       res = process.env.NEXT_PUBLIC_JIKAN_TOP_AIRING!;
       break;
     case "anime":
-      res = process.env.NEXT_PUBLIC_JIKAN_ANIME! + query + "&page=";
+      res =
+        process.env.NEXT_PUBLIC_JIKAN_ANIME! +
+        (query ? "/" + query + "&page=" : "");
       break;
     case "favorites":
       return null;

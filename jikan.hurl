@@ -1,3 +1,4 @@
+GET https://api.jikan.moe/v4/anime
 GET https://api.jikan.moe/v4/seasons/now
 GET https://aniwatch-api-v1-0.onrender.com/api/search/my+deer+friend/1
 GET https://aniwatch-api-v1-0.onrender.com/api/episode/oshi-no-ko-season-2-19256

@@ -12,12 +12,13 @@ export function useSetAnime(
 
   useEffect(() => {
     if (pages) {
+      console.log(pages.data);
       setAnime(
         title
           ? pages?.pages[current?.page]?.data.find(
               (anime) => anime.title === title,
             )
-          : pages?.pages[current?.page]?.data[current?.anime],
+          : pages?.pages[current.page]?.data[current.anime],
       );
     }
   }, [pages, current]);

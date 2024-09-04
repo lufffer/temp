@@ -41,6 +41,7 @@ import { Carousel } from "@/components/Carousel";
 import Icon from "@/components/Icon";
 import Loading from "@/components/Loading";
 import Loader from "../components/Loader";
+import { isLetter, isNumber } from "./utils/strings";
 
 const replaces = [
   [" ", "_"],
@@ -107,6 +108,7 @@ function Page() {
 
   const [isFiltering, setIsFiltering] = useState(true);
 
+  const [allPossibilities, setAllPossibilities] = useState<string[][]>([]);
   const [possibilities, setPossibilities] = useState<string[]>([]);
 
   const [notFound, setNotFound] = useState(false);
@@ -124,24 +126,6 @@ function Page() {
   // Then we would need another useEffect to respond to "gelbooruTagsRes" and check if we have results or not. If there is result we need
   // to filter the result by type, "type === 3" (It seems the 3 is for anime), and if after filter there are data, then sort by count,
   // "count !== 0", if so, then "setTitle", else, we need to change index and test next title.
-
-  const isNumber = (c: string) => {
-    switch (c) {
-      case "0":
-      case "1":
-      case "2":
-      case "3":
-      case "4":
-      case "5":
-      case "6":
-      case "7":
-      case "8":
-      case "9":
-        return true;
-    }
-
-    return false;
-  };
 
   const processTitle = (title: string) => {
     replaces.forEach(
@@ -190,184 +174,152 @@ function Page() {
     return title;
   };
 
+  const [index, setIndex] = useState(0);
+  const [lapses, setLapses] = useState(0);
+
+  const memo = useRef<string[]>([]);
+
   useEffect(() => {
-    let possibilities = [];
-
-    if (prequel === undefined) {
-      return;
-    } else if (prequel === null) {
-      if (anime!.title) {
-        possibilities.push(anime!.title);
-      }
-      if (anime!.title_english) {
-        possibilities.push(anime!.title_english);
-      }
-      if (anime!.title_synonyms.length > 0) {
-        possibilities.push(
-          ...anime!.title_synonyms.filter((synonym) => synonym.includes(" ")),
-        );
-      }
-    } else {
-      if (prequel.title) {
-        possibilities.push(prequel.title);
-      }
-      if (prequel.title_english) {
-        possibilities.push(prequel.title_english);
-      }
-      if (prequel.title_synonyms.length > 0) {
-        possibilities.push(
-          ...prequel.title_synonyms.filter((synonym) => synonym.includes(" ")),
-        );
-      }
+    if (anime) {
+      memo.current = [];
     }
+  }, [anime]);
 
-    if (parentStory) {
-      possibilities = [parentStory];
+  useEffect(() => {
+    if (prequel !== undefined) {
+      setNotFound(false);
+      setIndex(0);
+      setLapses(0);
+
+      let candidates = [];
+
+      if (parentStory) {
+        candidates.push([parentStory]);
+      }
+      if (adaptation) {
+        candidates.push([adaptation]);
+      }
+      if (prequel) {
+        const aux = [];
+        if (prequel!.title) {
+          aux.push(prequel!.title);
+        }
+        if (prequel!.title_english) {
+          aux.push(prequel!.title_english);
+        }
+        if (prequel!.title_synonyms.length > 0) {
+          aux.push(...prequel!.title_synonyms.filter((t) => isLetter(t[0])));
+        }
+        candidates.push(aux);
+      } else {
+        const aux = [];
+        if (anime!.title) {
+          aux.push(anime!.title);
+        }
+        if (anime!.title_english) {
+          aux.push(anime!.title_english);
+        }
+        if (anime!.title_synonyms.length > 0) {
+          aux.push(...anime!.title_synonyms.filter((t) => isLetter(t[0])));
+        }
+        candidates.push(aux);
+      }
+
+      console.log(candidates);
+
+      setAllPossibilities(candidates);
     }
-
-    if (adaptation) {
-      if (!parentStory || !adaptation.includes(" "))
-        possibilities = [adaptation];
-    }
-
-    possibilities.forEach(
-      (possibility, i, arr) => (arr[i] = processTitle(possibility)),
-    );
-    setPossibilities(possibilities);
   }, [prequel]);
 
-  const index = useRef(0);
-  const lapses = useRef(0);
-  const usingSynonyms = useRef(false);
+  useEffect(() => {
+    if (allPossibilities.length > 0) {
+      console.log(allPossibilities);
+      setPossibilities(
+        allPossibilities[0]
+          .map((p) => processTitle(p))
+          .filter((t) => !memo.current.includes(t)),
+      );
+      setIndex(0);
+      setLapses(0);
+    } else {
+      setNotFound(true);
+    }
+  }, [allPossibilities]);
 
   useEffect(() => {
-    if (possibilities.length > 0 && !title) {
-      if (
-        gelbooruTagsRes.isSuccess &&
-        gelbooruTagsRes.data["@attributes"].count !== 0
-      ) {
-        const filtered = gelbooruTagsRes.data.tag.filter(
-          (tag) => tag.type === 3,
-        );
-
-        if (filtered.length === 0) {
-          if (anime!.title_synonyms.length > 0 && !usingSynonyms) {
-            usingSynonyms.current = true;
-            setPossibilities(
-              anime!.title_synonyms.map((title) => processTitle(title)),
-            );
-            setTag("");
-            gelbooruTagsRes.data["@attributes"].count = 0;
-          } else {
-            setPossibilities((old) => {
-              const sliced = possibilities.map((title) => slicedTitle(title));
-              if (old.every((title, i) => title === sliced[i])) {
-                setNotFound(true);
-              } else {
-                setTag("");
-                return sliced;
-              }
-
-              return old;
-            });
-          }
+    let processed: string[] = [];
+    if (index === 0 && lapses > 0) {
+      if (possibilities.length > 0) {
+        if (allPossibilities.length > 1) {
+          processed = possibilities.filter((p) => p.split("_").length > 2);
+          processed = processed.filter((p) => p.includes("_"));
         } else {
-          usingSynonyms.current = false;
-          filtered.sort((a, b) => b.count - a.count);
-          setTitle(filtered[0].name);
-          setNotFound(false);
+          processed = possibilities.filter((p) => p.includes("_"));
         }
-
-        index.current = 0;
-        lapses.current = 0;
-      } else if (tag === "" || !gelbooruTagsRes.isPending) {
-        let possibility: string;
-        if (lapses.current > 0) {
-          possibility = possibilities[index.current] = slicedTitle(
-            possibilities[index.current],
-          );
+        console.log(processed);
+        if (processed.length > 0) {
+          processed = [...new Set(processed)];
+          processed = processed.map((p) => slicedTitle(p));
+          processed = processed.filter((p) => !memo.current.includes(p));
+          processed.length > 0
+            ? setPossibilities(processed)
+            : setAllPossibilities((old) => old.slice(1));
         } else {
-          if (possibilities[index.current].includes("я")) {
-            possibility = "milgram";
-          } else if (possibilities[index.current] === "monster") {
-            possibility = "monster_(manga)";
-          } else {
-            possibility = possibilities[index.current];
-          }
-        }
-        let length = 0;
-        setTag((old) => {
-          if (old === possibility) {
-            if (prequel && !usingSynonyms.current) {
-              const newTitles = prequel.title_synonyms.filter((title) =>
-                title.includes(" "),
-              );
-
-              newTitles.forEach(
-                (title, i, arr) => (arr[i] = processTitle(title)),
-              );
-
-              index.current = 0;
-              lapses.current = 0;
-
-              setPossibilities(newTitles);
-
-              return newTitles[0];
-            } else if (
-              anime!.title_synonyms.length > 0 &&
-              !usingSynonyms.current
-            ) {
-              setPossibilities(
-                anime!.title_synonyms.map((title) => processTitle(title)),
-              );
-              length = anime!.title_synonyms.length;
-            } else {
-              setPossibilities((old) => {
-                const sliced = possibilities.map((title) => slicedTitle(title));
-                if (old.every((value, i) => value === sliced[i])) {
-                  setNotFound(true);
-                } else {
-                  setTag("");
-                  return sliced;
-                }
-
-                return old;
-              });
-            }
-          }
-
-          return possibility;
-        });
-
-        index.current++;
-
-        if (index.current === (length > 0 ? length : possibilities.length)) {
-          index.current = 0;
-          lapses.current++;
-          setPossibilities([...new Set(possibilities)]);
+          setAllPossibilities((old) => old.slice(1));
         }
       }
     }
-  }, [possibilities, gelbooruTagsRes.status, tag]);
+  }, [lapses]);
 
   useEffect(() => {
-    if (
-      !gelbooru.isSuccess &&
-      gelbooruTagsRes.isSuccess &&
-      gelbooruTagsRes.data &&
-      gelbooruTagsRes.data.tag &&
-      (gelbooruTagsRes.data.tag[0].count === 0 ||
-        gelbooruTagsRes.data.tag[0].type !== 3) &&
-      title
-    ) {
-      setPossibilities([slicedTitle(tag)]);
-      setTag(slicedTitle(tag));
-      index.current = 0;
-      lapses.current = 0;
-      gelbooruTagsRes.data["@attributes"].count = 0;
-      setTitle("");
+    if (possibilities.length > 0) {
+      if (possibilities[index] === "monster") {
+        setTag("monster_(manga)");
+      } else if (possibilities[index].includes("ᴙ")) {
+        setTag("milgram");
+      } else {
+        setTag(possibilities[index]);
+      }
+      memo.current.push(possibilities[index]);
     }
-  }, [title, gelbooru.status, gelbooruTagsRes.status]);
+  }, [index, possibilities]);
+
+  useEffect(() => {
+    if (gelbooruTagsRes.isSuccess) {
+      if (gelbooruTagsRes.data["@attributes"].count !== 0) {
+        const filtered = gelbooruTagsRes.data.tag.filter((t) => t.type === 3);
+        console.log(filtered);
+        if (filtered.length === 0) {
+          setIndex((old) => {
+            let aux = old + 1;
+            if (aux === possibilities.length) {
+              aux = 0;
+              setLapses(lapses + 1);
+            }
+
+            return aux;
+          });
+        } else {
+          filtered.sort((a, b) => b.count - a.count);
+          console.log(filtered);
+          setTitle(filtered[0].name);
+        }
+      } else {
+        setIndex((old) => {
+          let aux = old + 1;
+          console.log(possibilities);
+          console.log(possibilities.length);
+          console.log(aux);
+          if (aux === possibilities.length) {
+            aux = 0;
+            setLapses((old) => old + 1);
+          }
+
+          return aux;
+        });
+      }
+    }
+  }, [gelbooruTagsRes.status]);
 
   useEffect(() => {
     if (!emblaImageApi) return;
