@@ -12,7 +12,6 @@ export function useSetAnime(
 
   useEffect(() => {
     if (pages) {
-      console.log(pages.data);
       setAnime(
         title
           ? pages?.pages[current?.page]?.data.find(

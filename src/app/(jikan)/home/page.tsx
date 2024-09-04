@@ -26,9 +26,6 @@ import Icon from "@/components/Icon";
 const options = ["NOW", "UPCOMING", "TOP", "TOP AIRING", "ANIME", "FAVORITES"];
 
 export default function Page() {
-  const listRef = useRef<HTMLDivElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
-
   const { current, changeCurrent, queryKey, changeQueryKey, query } =
     useAnimeStore((state) => state);
 
@@ -127,18 +124,7 @@ export default function Page() {
   return (
     <>
       <QuickInfo />
-      <Slider ref={listRef}>
-        <SliderHeader className="flex justify-between px-2">
-          <BorderedContainer className="relative w-3/4">
-            <Selector options={options} type="button" onClick={handleClick} />
-          </BorderedContainer>
-          <RoundedButton
-            className="relative"
-            onClick={(e) => handleToggleSlider(e, isOpen, setIsOpen, listRef)}
-          >
-            <Icon src="/circle-chevron-up.svg" title="Open slider" />
-          </RoundedButton>
-        </SliderHeader>
+      <Slider opts={options}>
         <Thumbs options={{ dragFree: true, loop: true }}>
           {pages ? (
             renderThumbs("my-thumb-slide")

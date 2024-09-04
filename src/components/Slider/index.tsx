@@ -1,18 +1,22 @@
-import React, { forwardRef } from "react";
+import React, { ReactNode, RefObject, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Glass from "../Glass";
+import { SliderHeader } from "./SliderHeader";
+import BorderedContainer from "../BorderedContainer";
+import Selector from "../Selector";
 
 type Props = {
-  children: React.ReactNode;
+  opts: string[];
+  children: ReactNode;
 };
 
 const handleToggleSlider = (
   e: React.MouseEvent<HTMLButtonElement>,
   isOpen: boolean,
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>,
-  listRef: React.RefObject<HTMLDivElement>,
+  ref: RefObject<HTMLDivElement>,
 ) => {
-  const $list = listRef.current!;
+  const $list = ref.current!;
   const $slider = e.currentTarget.parentElement!.parentElement!;
 
   if (isOpen) {
@@ -37,16 +41,26 @@ const handleToggleSlider = (
   setIsOpen(!isOpen);
 };
 
-export default forwardRef<HTMLDivElement, Props>(function Slider(
-  { children },
-  ref,
-) {
+const Slider = ({ opts, children }: Props) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="my-slider">
+    <section className="my-slider">
+      <SliderHeader>
+        <BorderedContainer className="relative w-3/4">
+          <Selector
+            options={opts}
+            type="button"
+            onClick={(e) => handleToggleSlider(e, isOpen, setIsOpen, ref)}
+          />
+        </BorderedContainer>
+      </SliderHeader>
       {children}
       {createPortal(<Glass ref={ref} />, document.body)}
-    </div>
+    </section>
   );
-});
+};
 
+export default Slider;
 export { handleToggleSlider };
