@@ -27,9 +27,8 @@ export default function RootLayout({
         <AnimeStoreProvider>
           <QueryProvider>
             <ClerkProvider>
-              <Background />
               <Header />
-              <Main>{children}</Main>
+              {children}
               <Footer />
             </ClerkProvider>
           </QueryProvider>

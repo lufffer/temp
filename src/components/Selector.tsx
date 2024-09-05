@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useAnimeStore } from "@/providers/store.provider";
@@ -9,17 +11,23 @@ import Marquee from "react-fast-marquee";
 type Props = {
   options: string[];
   type: "button" | "link" | "marquee";
+  slug: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 const size = 28;
 
-function Selector({ options, type, onClick }: Props) {
+function Selector({ options, type, slug, onClick }: Props) {
   const path = usePathname();
   const [emblaOptionsRef, emblaOptionsApi] = useEmblaCarousel();
   const { queryKey, changeQueryKey, query } = useAnimeStore((state) => state);
 
   useEffect(() => {
+    if (slug) {
+      const index = options.indexOf(slug.toUpperCase());
+      emblaOptionsApi?.scrollTo(index);
+    }
+
     if (queryKey[0] === "anime") {
       emblaOptionsApi?.scrollTo(options.findIndex((opt) => opt === "ANIME"));
     } else if (path === "/episodes") {

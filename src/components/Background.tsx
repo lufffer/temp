@@ -1,22 +1,19 @@
 "use client";
 
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useState } from "react";
 import { useAnimeStore } from "@/providers/store.provider";
-import { animesQuery } from "@/services/jikan.service";
-import { favoritesQuery } from "@/services/favorites.service";
-import { useSetPages } from "@/hooks/useSetPages";
-import { useSetAnime } from "@/hooks/useSetAnime";
+import { JikanAnimeContext } from "@/app/[...slug]/providers/jikanAnime.provider";
 
-function Background() {
-  const { queryKey } = useAnimeStore((state) => state);
+const Background = () => {
+  const ctx = useContext(JikanAnimeContext);
+  const { current } = useAnimeStore((state) => state);
+  const [img, setImg] = useState("");
 
-  const animes = useInfiniteQuery(animesQuery(queryKey));
-  const favorites = useInfiniteQuery(favoritesQuery());
-
-  const pages = useSetPages(animes, favorites);
-  const anime = useSetAnime(pages);
-
-  const img = anime?.images.webp.image_url || "";
+  useEffect(() => {
+    if (ctx?.animes) {
+      setImg(ctx.animes[current.anime].images.webp.image_url);
+    }
+  }, [ctx, current.anime]);
 
   return (
     <div
@@ -26,6 +23,6 @@ function Background() {
       }}
     ></div>
   );
-}
+};
 
 export default Background;

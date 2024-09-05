@@ -1,20 +1,34 @@
+"use client";
+
+import { ReactNode } from "react";
+import { useAnimeStore } from "@/providers/store.provider";
+
 type Props = {
   className: string;
-  bgImg: string;
-  borderWidth: string;
-  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
-  children: React.ReactNode;
+  img: string;
+  i: number;
+  children: ReactNode;
 };
 
-function Thumb({ className, bgImg, borderWidth, onClick, children }: Props) {
+function Thumb({ className, img, i, children }: Props) {
+  const { current, changeCurrent } = useAnimeStore((state) => state);
+  const bg = (current.anime !== i ? "var(--glass)," : "") + `url('${img}')`;
+  const bw = current.anime === i ? "2px" : "0px";
+
+  const handleClickChangeCurrent = () => {
+    changeCurrent({ page: current.page, anime: i });
+  };
+
   return (
     <div
       className={className}
       style={{
-        backgroundImage: bgImg,
-        borderWidth: borderWidth,
+        backgroundImage: bg,
+        borderWidth: bw,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
-      onClick={onClick}
+      onClick={handleClickChangeCurrent}
     >
       {children}
     </div>

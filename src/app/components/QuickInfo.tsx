@@ -1,11 +1,11 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+"use client";
+
 import { useAnimeStore } from "@/providers/store.provider";
-import { animesQuery } from "@/services/jikan.service";
-import { favoritesQuery } from "@/services/favorites.service";
-import { useSetPages } from "@/hooks/useSetPages";
-import { useSetAnime } from "@/hooks/useSetAnime";
 import Field from "@/components/Field";
 import Bold from "@/components/Bold";
+import { Anime } from "@/types/animes.type";
+import { useContext, useEffect, useState } from "react";
+import { JikanAnimeContext } from "../[...slug]/providers/jikanAnime.provider";
 
 type Props = {
   className?: string;
@@ -13,14 +13,12 @@ type Props = {
 };
 
 export default function QuickInfo({ className, extra = false }: Props) {
-  const { queryKey } = useAnimeStore((state) => state);
+  const { current } = useAnimeStore((state) => state);
+  const ctx = useContext(JikanAnimeContext);
 
-  const animesRes = useInfiniteQuery(animesQuery(queryKey));
-  const favoritesRes = useInfiniteQuery(favoritesQuery());
+  const [animes, setAnimes] = useState<Anime[]>([]);
 
-  const ptr = useSetPages(animesRes, favoritesRes);
-  const anime = useSetAnime(ptr);
-
+  const anime = animes[current.anime];
   const rank = anime?.rank;
   const episodes = anime?.episodes;
   const status = anime?.status;
@@ -55,6 +53,12 @@ export default function QuickInfo({ className, extra = false }: Props) {
     ["GENRES", genres],
     ["DEMOGRAPHICS", demographics],
   ];
+
+  useEffect(() => {
+    if (ctx?.animes) {
+      setAnimes(ctx.animes);
+    }
+  }, [ctx]);
 
   return (
     <>

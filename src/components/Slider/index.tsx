@@ -1,4 +1,12 @@
-import React, { ReactNode, RefObject, useRef, useState } from "react";
+"use client";
+
+import React, {
+  ReactNode,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import Glass from "../Glass";
 import { SliderHeader } from "./SliderHeader";
@@ -8,6 +16,7 @@ import Selector from "../Selector";
 type Props = {
   opts: string[];
   type: "link" | "button" | "marquee";
+  slug: string;
   children: ReactNode;
 };
 
@@ -42,9 +51,14 @@ const handleToggleSlider = (
   setIsOpen(!isOpen);
 };
 
-const Slider = ({ opts, type, children }: Props) => {
+const Slider = ({ opts, type, slug, children }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [portal, setPortal] = useState(<></>);
+
+  useEffect(() => {
+    setPortal(createPortal(<Glass ref={ref} />, document.body));
+  }, []);
 
   return (
     <section className="my-slider">
@@ -53,12 +67,13 @@ const Slider = ({ opts, type, children }: Props) => {
           <Selector
             options={opts}
             type={type}
+            slug={slug}
             onClick={(e) => handleToggleSlider(e, isOpen, setIsOpen, ref)}
           />
         </BorderedContainer>
       </SliderHeader>
       {children}
-      {createPortal(<Glass ref={ref} />, document.body)}
+      {portal}
     </section>
   );
 };

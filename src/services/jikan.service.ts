@@ -1,5 +1,3 @@
-import { Animes } from "@/types/animes.type";
-
 type Params = {
   pageParam: number;
 };
