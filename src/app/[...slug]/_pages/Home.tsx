@@ -1,34 +1,41 @@
-import { fetchJikanAnimes } from "@/actions/jikanAnimes";
-import QuickInfo from "@/app/components/QuickInfo";
-import Slider from "@/components/Slider";
-import Thumb from "@/components/Thumbs/components/Thumb";
-import Thumbs from "@/components/Thumbs/Thumbs";
+import { QuickInfo } from "@/app/components/QuickInfo";
+import InfiniteContainer from "@/components/InfiniteContainer";
+import { Slider } from "@/components/Slider";
+import { Thumbs } from "@/components/Thumbs/Thumbs";
 import { Title } from "@/components/Title";
+import { LoadMoreAnimes } from "../components/LoadMoreAnimes";
+import { get } from "@/actions/jikanFavoritesAnimes";
+import { RenderThumbs } from "../components/RenderThumbs";
 
 type Props = {
-  slug: string;
+  slug: string[];
 };
 
 const opts = ["NOW", "UPCOMING", "TOP", "TOP AIRING", "ANIME", "FAVORITES"];
 
 const Home = async ({ slug }: Props) => {
-  const jikanAnimes = await fetchJikanAnimes(slug, 1);
+  const favoritesAnimes = await get();
 
   return (
     <>
       <Title />
       <QuickInfo />
-      <Slider opts={opts} type="button" slug={slug}>
+      <Slider opts={opts} type="link" slug={slug}>
         <Thumbs options={{ dragFree: true, loop: true }}>
-          {jikanAnimes.data.map((anime, i: number) => (
-            <Thumb
-              key={i}
-              className="my-thumb-slide"
-              img={anime.images.webp.image_url}
-              i={i}
-            />
-          ))}
+          <RenderThumbs
+            slug={slug}
+            classNameLink="my-thumb-slide-link"
+            className="my-thumb-slide"
+          />
         </Thumbs>
+        <InfiniteContainer>
+          <RenderThumbs
+            slug={slug}
+            className="my-thumb-poster"
+            classNameLink="my-thumb-poster-link"
+          />
+          <LoadMoreAnimes slug={slug} favoritesAnimes={favoritesAnimes} />
+        </InfiniteContainer>
       </Slider>
     </>
   );

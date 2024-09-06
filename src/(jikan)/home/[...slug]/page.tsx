@@ -31,7 +31,6 @@ type Props = {
 const options = ["NOW", "UPCOMING", "TOP", "TOP AIRING", "ANIME", "FAVORITES"];
 
 export default async function Page({ params }: Props) {
-  console.log(params.slug);
   const jikanAnimes = await fetchJikanAnimes(params.slug[0], 1);
   // const { current, changeCurrent, queryKey, changeQueryKey, query } =
   //   useAnimeStore((state) => state);

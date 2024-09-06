@@ -1,38 +1,35 @@
 "use client";
 
-import { ReactNode } from "react";
-import { useAnimeStore } from "@/providers/store.provider";
+import { useHash } from "@/app/[...slug]/hooks/useHash";
 
 type Props = {
+  classNameLink: string;
   className: string;
   img: string;
   i: number;
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
-function Thumb({ className, img, i, children }: Props) {
-  const { current, changeCurrent } = useAnimeStore((state) => state);
-  const bg = (current.anime !== i ? "var(--glass)," : "") + `url('${img}')`;
-  const bw = current.anime === i ? "2px" : "0px";
-
-  const handleClickChangeCurrent = () => {
-    changeCurrent({ page: current.page, anime: i });
-  };
+const Thumb = ({ classNameLink, className, img, i, children }: Props) => {
+  const hash = useHash();
+  const bg = (hash !== i ? "var(--glass)," : "") + `url('${img}')`;
+  const bw = hash === i ? "2px" : "0px";
 
   return (
-    <div
-      className={className}
-      style={{
-        backgroundImage: bg,
-        borderWidth: bw,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-      onClick={handleClickChangeCurrent}
-    >
-      {children}
-    </div>
+    <a href={`#${i}`} className={classNameLink}>
+      <div
+        className={className}
+        style={{
+          backgroundImage: bg,
+          borderWidth: bw,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {children}
+      </div>
+    </a>
   );
-}
+};
 
-export default Thumb;
+export { Thumb };

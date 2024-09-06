@@ -1,19 +1,20 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useHash } from "@/app/[...slug]/hooks/useHash";
 import { useAnimeStore } from "@/providers/store.provider";
-import { JikanAnimeContext } from "@/app/[...slug]/providers/jikanAnime.provider";
 
 const Background = () => {
-  const ctx = useContext(JikanAnimeContext);
-  const { current } = useAnimeStore((state) => state);
+  const { animes } = useAnimeStore((state) => state);
   const [img, setImg] = useState("");
+  const hash = useHash();
 
   useEffect(() => {
-    if (ctx?.animes) {
-      setImg(ctx.animes[current.anime].images.webp.image_url);
+    if (animes.length > 0) {
+      console.log(animes);
+      setImg(animes[hash].images.webp.image_url);
     }
-  }, [ctx, current.anime]);
+  }, [animes, hash]);
 
   return (
     <div

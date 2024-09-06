@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { useAnimeStore } from "@/providers/store.provider";
 import RoundedButton from "./RoundedButton";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -20,20 +19,13 @@ const size = 28;
 function Selector({ options, type, slug, onClick }: Props) {
   const path = usePathname();
   const [emblaOptionsRef, emblaOptionsApi] = useEmblaCarousel();
-  const { queryKey, changeQueryKey, query } = useAnimeStore((state) => state);
 
   useEffect(() => {
     if (slug) {
-      const index = options.indexOf(slug.toUpperCase());
+      const index = options.indexOf(slug.replaceAll("_", " ").toUpperCase());
       emblaOptionsApi?.scrollTo(index);
     }
-
-    if (queryKey[0] === "anime") {
-      emblaOptionsApi?.scrollTo(options.findIndex((opt) => opt === "ANIME"));
-    } else if (path === "/episodes") {
-      emblaOptionsApi?.scrollTo(options.findIndex((opt) => opt === "Episodes"));
-    }
-  }, [queryKey, emblaOptionsApi]);
+  }, [emblaOptionsApi]);
 
   const handleMoveNext = () => {
     emblaOptionsApi?.scrollNext();
@@ -46,12 +38,6 @@ function Selector({ options, type, slug, onClick }: Props) {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     const target = e.target as HTMLSpanElement;
     const option = target.textContent!.toLowerCase();
-
-    changeQueryKey([option, option === "anime" ? query : ""]);
-  };
-
-  const isCurrentQueryKey = (opt: string) => {
-    return opt?.toLowerCase() === queryKey[0];
   };
 
   const isCurrentPath = (opt: string) => {
@@ -78,11 +64,11 @@ function Selector({ options, type, slug, onClick }: Props) {
                 >
                   <span
                     className={`my-selector-option`}
-                    style={{
-                      color: isCurrentQueryKey(opt)
-                        ? "var(--primary-light)"
-                        : "var(--light)",
-                    }}
+                    // style={{
+                    //   color: isCurrentQueryKey(opt)
+                    //     ? "var(--primary-light)"
+                    //     : "var(--light)",
+                    // }}
                   >
                     {opt}
                   </span>
@@ -90,11 +76,11 @@ function Selector({ options, type, slug, onClick }: Props) {
               ) : type === "marquee" ? (
                 <Marquee
                   className={`my-selector-option`}
-                  style={{
-                    color: isCurrentQueryKey(opt)
-                      ? "var(--primary-light)"
-                      : "var(--light)",
-                  }}
+                  // style={{
+                  //   color: isCurrentQueryKey(opt)
+                  //     ? "var(--primary-light)"
+                  //     : "var(--light)",
+                  // }}
                 >
                   <button
                     onClick={onClick || handleClick}
@@ -106,7 +92,7 @@ function Selector({ options, type, slug, onClick }: Props) {
               ) : (
                 <button className="w-full py-1">
                   <Link
-                    href={"/" + opt.toLowerCase()}
+                    href={"/home/" + opt.replaceAll(" ", "_").toLowerCase()}
                     className={`my-selector-option`}
                     style={{
                       color: isCurrentPath(opt)
@@ -114,7 +100,7 @@ function Selector({ options, type, slug, onClick }: Props) {
                         : "var(--light)",
                     }}
                   >
-                    <span className="mx-16">{opt}</span>
+                    <span className="mx-auto text-center">{opt}</span>
                   </Link>
                 </button>
               )}

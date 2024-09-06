@@ -1,36 +1,22 @@
 "use client";
 
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from "react";
+import { useAnimeStore } from "@/providers/store.provider";
 import { Anime } from "@/types/animes.type";
+import { useEffect } from "react";
 
 type Props = {
   value: Anime[];
-  children: ReactNode;
+  children: React.ReactNode;
 };
-
-type JikanAnimeType = {
-  animes: Anime[];
-  setAnimes: Dispatch<SetStateAction<Anime[]>>;
-};
-
-const JikanAnimeContext = createContext<JikanAnimeType | null>(null);
 
 const JikanAnime = ({ value, children }: Props) => {
-  const [animes, setAnimes] = useState<Anime[]>(value);
+  const { changeAnimes } = useAnimeStore((state) => state);
 
-  return (
-    <JikanAnimeContext.Provider
-      value={{ animes: animes, setAnimes: setAnimes }}
-    >
-      {children}
-    </JikanAnimeContext.Provider>
-  );
+  useEffect(() => {
+    changeAnimes(value);
+  }, []);
+
+  return <>{children}</>;
 };
 
-export { JikanAnime, JikanAnimeContext };
+export { JikanAnime };

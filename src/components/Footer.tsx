@@ -5,17 +5,16 @@ import Hamburger from "hamburger-react";
 import { useAnimeStore } from "@/providers/store.provider";
 import Selector from "./Selector";
 import BorderedContainer from "./BorderedContainer";
+import { useRouter } from "next/navigation";
 
 const options = ["Home", "Episodes", "Info", "Music", "Cast", "Gallery"];
 const size = 28;
 
 export default function Footer() {
+  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const footerRef = useRef<HTMLElement>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { changeQueryKey, changeQuery, changeCurrent } = useAnimeStore(
-    (state) => state,
-  );
 
   const handleToggle = (toggled: boolean) => {
     const footer = footerRef.current!;
@@ -26,9 +25,7 @@ export default function Footer() {
   const handleClick = () => {
     const value = inputRef.current!.value;
 
-    changeQueryKey(["anime", value]);
-    changeQuery(value);
-    changeCurrent({ anime: 0, page: 0 });
+    router.push(`/home/anime/${value.replaceAll(" ", "_")}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

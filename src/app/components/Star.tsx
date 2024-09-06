@@ -1,32 +1,43 @@
+"use client";
+
+import { add, remove } from "@/actions/jikanFavoritesAnimes";
+import { Anime } from "@/types/animes.type";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 type Props = {
+  anime: Anime;
   isFavorite: boolean;
-  mutate: (action: string) => void;
 };
 
 const size = 28;
 
-export default function Start({ isFavorite, mutate }: Props): React.ReactNode {
-  const handleClickToggleFavorite = async (
-    e: React.MouseEvent<HTMLImageElement>,
+const Star = ({ anime, isFavorite }: Props): React.ReactNode => {
+  const router = useRouter();
+  const handleClickToggleFavorite = (
+    e: React.MouseEvent<HTMLButtonElement>,
   ) => {
+    const img = e.currentTarget.firstElementChild as HTMLImageElement;
     if (!isFavorite) {
-      e.currentTarget.src = window.location.origin + "/starActive.svg";
-      mutate("add");
+      img.src = window.location.origin + "/starActive.svg";
+      add(anime);
     } else {
-      e.currentTarget.src = window.location.origin + "/starInactive.svg";
-      mutate("remove");
+      img.src = window.location.origin + "/starInactive.svg";
+      remove(anime);
     }
+    router.refresh();
   };
 
   return (
-    <img
-      src={isFavorite ? "/starActive.svg" : "/starInactive.svg"}
-      height={size}
-      width={size}
-      className="my-star"
-      onClick={handleClickToggleFavorite}
-    />
+    <button className="bg-none border-none" onClick={handleClickToggleFavorite}>
+      <img
+        src={isFavorite ? "/starActive.svg" : "/starInactive.svg"}
+        height={size}
+        width={size}
+        className="my-star"
+      />
+    </button>
   );
-}
+};
+
+export { Star };

@@ -1,23 +1,23 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
-import { useAnimeStore } from "@/providers/store.provider";
+import { useHash } from "@/app/[...slug]/hooks/useHash";
 
 type Props = {
   options: EmblaOptionsType;
   children: React.ReactNode;
 };
 
-export default function Thumbs({ options, children }: Props): React.ReactNode {
-  const path = usePathname();
-  const { current } = useAnimeStore((state) => state);
+const Thumbs = ({ options, children }: Props): React.ReactNode => {
   const [emblaAnimeRef, emblaAnimeApi] = useEmblaCarousel(options);
+  const hash = useHash();
 
   useEffect(() => {
     if (emblaAnimeApi) {
-      emblaAnimeApi.scrollTo(current.anime);
+      if (hash < 25) {
+        emblaAnimeApi.scrollTo(hash);
+      }
     }
   });
 
@@ -26,4 +26,6 @@ export default function Thumbs({ options, children }: Props): React.ReactNode {
       <div className="embla__container">{children}</div>
     </nav>
   );
-}
+};
+
+export { Thumbs };

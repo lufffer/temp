@@ -1,24 +1,21 @@
 "use client";
 
-import React, { ReactNode, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Marquee from "react-fast-marquee";
-import { JikanAnimeContext } from "@/app/[...slug]/providers/jikanAnime.provider";
+import { useHash } from "@/app/[...slug]/hooks/useHash";
 import { useAnimeStore } from "@/providers/store.provider";
 
-type Props = {
-  children: ReactNode;
-};
-
 const Title = () => {
-  const ctx = useContext(JikanAnimeContext);
-  const { current } = useAnimeStore((state) => state);
+  const { animes } = useAnimeStore((state) => state);
   const [title, setTitle] = useState("");
+  const hash = useHash();
 
   useEffect(() => {
-    if (ctx?.animes) {
-      setTitle(ctx.animes[current.anime].title);
+    if (animes.length > 0) {
+      const i = Number(window.location.hash.slice(1) ?? 0);
+      setTitle(animes[i].title);
     }
-  }, [ctx]);
+  }, [animes, hash]);
 
   return (
     <Marquee>

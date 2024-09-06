@@ -225,15 +225,12 @@ function Page() {
         candidates.push(aux);
       }
 
-      console.log(candidates);
-
       setAllPossibilities(candidates);
     }
   }, [prequel]);
 
   useEffect(() => {
     if (allPossibilities.length > 0) {
-      console.log(allPossibilities);
       setPossibilities(
         allPossibilities[0]
           .map((p) => processTitle(p))
@@ -256,7 +253,6 @@ function Page() {
         } else {
           processed = possibilities.filter((p) => p.includes("_"));
         }
-        console.log(processed);
         if (processed.length > 0) {
           processed = [...new Set(processed)];
           processed = processed.map((p) => slicedTitle(p));
@@ -288,7 +284,6 @@ function Page() {
     if (gelbooruTagsRes.isSuccess) {
       if (gelbooruTagsRes.data["@attributes"].count !== 0) {
         const filtered = gelbooruTagsRes.data.tag.filter((t) => t.type === 3);
-        console.log(filtered);
         if (filtered.length === 0) {
           setIndex((old) => {
             let aux = old + 1;
@@ -301,15 +296,11 @@ function Page() {
           });
         } else {
           filtered.sort((a, b) => b.count - a.count);
-          console.log(filtered);
           setTitle(filtered[0].name);
         }
       } else {
         setIndex((old) => {
           let aux = old + 1;
-          console.log(possibilities);
-          console.log(possibilities.length);
-          console.log(aux);
           if (aux === possibilities.length) {
             aux = 0;
             setLapses((old) => old + 1);

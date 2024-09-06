@@ -125,12 +125,24 @@ body {
     @apply absolute bottom-2 right-2 select-none;
   }
 
+  .my-embla-thumb {
+    @apply embla__slide relative mr-4 flex-grow-0 flex-shrink-0;
+  }
+
+  .my-thumb-slide-link {
+    @apply my-embla-thumb basis-[40%] h-[80px];
+  }
+
+  .my-thumb-poster-link {
+    @apply my-embla-thumb w-[150px] h-[200px];
+  }
+
   .my-thumb-poster {
-    @apply relative w-[150px] h-[200px] flex justify-center items-center rounded-2xl bg-center bg-cover;
+    @apply h-[200px] flex justify-center items-center rounded-2xl bg-center bg-cover;
   }
 
   .my-thumb-slide {
-    @apply embla__slide relative mr-4 flex-grow-0 flex-shrink-0 basis-[40%] h-[80px] rounded-xl border-white bg-center bg-cover;
+    @apply h-[80px] rounded-xl border-white bg-center bg-cover;
   }
 
   .my-title {
