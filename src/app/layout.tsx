@@ -24,15 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className}`}>
-        <AnimeStoreProvider>
-          <QueryProvider>
-            <ClerkProvider>
-              <Header />
-              {children}
-              <Footer />
-            </ClerkProvider>
-          </QueryProvider>
-        </AnimeStoreProvider>
+        <ClerkProvider>
+          <Header />
+          {children}
+          <Footer />
+        </ClerkProvider>
       </body>
     </html>
   );

@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import Hamburger from "hamburger-react";
-import { useAnimeStore } from "@/providers/store.provider";
 import Selector from "./Selector";
 import BorderedContainer from "./BorderedContainer";
 import { useRouter } from "next/navigation";

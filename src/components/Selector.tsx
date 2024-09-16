@@ -3,27 +3,28 @@
 import { useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import RoundedButton from "./RoundedButton";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Marquee from "react-fast-marquee";
 
 type Props = {
-  options: string[];
+  options: string[][];
   type: "button" | "link" | "marquee";
-  slug: string;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
 const size = 28;
 
-function Selector({ options, type, slug, onClick }: Props) {
+function Selector({ options, type, onClick }: Props) {
   const path = usePathname();
+  const searchParams = useSearchParams();
+  console.log(searchParams);
   const [emblaOptionsRef, emblaOptionsApi] = useEmblaCarousel();
 
   useEffect(() => {
-    if (slug) {
-      const index = options.indexOf(slug.replaceAll("_", " ").toUpperCase());
-      emblaOptionsApi?.scrollTo(index);
+    if (searchParams.size > 0) {
+      // const index = options.indexOf(slug.replaceAll("_", " ").toUpperCase());
+      emblaOptionsApi?.scrollTo(0);
     }
   }, [emblaOptionsApi]);
 
@@ -92,15 +93,15 @@ function Selector({ options, type, slug, onClick }: Props) {
               ) : (
                 <button className="w-full py-1">
                   <Link
-                    href={"/home/" + opt.replaceAll(" ", "_").toLowerCase()}
+                    href={opt[1].replaceAll(" ", "_").toLowerCase()}
                     className={`my-selector-option`}
                     style={{
-                      color: isCurrentPath(opt)
+                      color: isCurrentPath(opt[0])
                         ? "var(--primary-light)"
                         : "var(--light)",
                     }}
                   >
-                    <span className="mx-auto text-center">{opt}</span>
+                    <span className="mx-auto text-center">{opt[0]}</span>
                   </Link>
                 </button>
               )}

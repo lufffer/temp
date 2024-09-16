@@ -1,20 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useHash } from "@/app/[...slug]/hooks/useHash";
-import { useAnimeStore } from "@/providers/store.provider";
+import { useHash } from "@/app/home/hooks/useHash";
+import { Anime } from "@/types/animes.type";
 
-const Background = () => {
-  const { animes } = useAnimeStore((state) => state);
-  const [img, setImg] = useState("");
+type Props = {
+  animes: Anime[];
+};
+
+const Background = ({ animes }: Props) => {
   const hash = useHash();
-
-  useEffect(() => {
-    if (animes.length > 0) {
-      console.log(animes);
-      setImg(animes[hash].images.webp.image_url);
-    }
-  }, [animes, hash]);
+  const img = animes[hash].images.webp.image_url;
 
   return (
     <div

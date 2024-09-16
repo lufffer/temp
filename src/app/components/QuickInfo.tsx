@@ -2,19 +2,17 @@
 
 import Field from "@/components/Field";
 import Bold from "@/components/Bold";
-import { useHash } from "../[...slug]/hooks/useHash";
-import { useAnimeStore } from "@/providers/store.provider";
+import { useHash } from "@/app/home/hooks/useHash";
+import { Anime } from "@/types/animes.type";
 
 type Props = {
+  animes: Anime[];
   className?: string;
   extra?: boolean;
 };
 
-const QuickInfo = ({ className, extra = false }: Props) => {
-  const { animes } = useAnimeStore((state) => state);
+const QuickInfo = ({ animes, className, extra = false }: Props) => {
   const hash = useHash();
-
-  if (animes.length === 0) return <></>;
 
   const anime = animes[hash];
   const rank = anime?.rank;

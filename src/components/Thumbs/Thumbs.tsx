@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import useEmblaCarousel, { EmblaOptionsType } from "embla-carousel-react";
-import { useHash } from "@/app/[...slug]/hooks/useHash";
+import { useHash } from "@/app/home/hooks/useHash";
 
 type Props = {
   options: EmblaOptionsType;

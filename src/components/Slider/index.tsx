@@ -9,15 +9,14 @@ import Selector from "../Selector";
 import RoundedButton from "../RoundedButton";
 
 type Props = {
-  opts: string[];
+  opts: string[][];
   type: "link" | "button" | "marquee";
-  slug: string[];
   children: React.ReactNode;
 };
 
 const size = 28;
 
-const Slider = ({ opts, type, slug, children }: Props) => {
+const Slider = ({ opts, type, children }: Props) => {
   const ref = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [portal, setPortal] = useState(<></>);
@@ -56,7 +55,7 @@ const Slider = ({ opts, type, slug, children }: Props) => {
     <section className="my-slider">
       <SliderHeader className="flex justify-between">
         <BorderedContainer className="relative w-3/4">
-          <Selector options={opts} type={type} slug={slug[0]} />
+          <Selector options={opts} type={type} />
         </BorderedContainer>
         <RoundedButton className="relative" onClick={handleToggleSlider}>
           <img

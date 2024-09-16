@@ -1,21 +1,17 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Marquee from "react-fast-marquee";
-import { useHash } from "@/app/[...slug]/hooks/useHash";
-import { useAnimeStore } from "@/providers/store.provider";
+import { useHash } from "@/app/home/hooks/useHash";
+import { Anime } from "@/types/animes.type";
 
-const Title = () => {
-  const { animes } = useAnimeStore((state) => state);
-  const [title, setTitle] = useState("");
+type Props = {
+  animes: Anime[];
+};
+
+const Title = ({ animes }: Props) => {
   const hash = useHash();
-
-  useEffect(() => {
-    if (animes.length > 0) {
-      const i = Number(window.location.hash.slice(1) ?? 0);
-      setTitle(animes[i].title);
-    }
-  }, [animes, hash]);
+  const title = animes[hash].title;
 
   return (
     <Marquee>
